@@ -17,6 +17,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'edl-v10.html'
+        exclude 'epl-v10.html'
+        exclude 'about.html'
+        exclude 'notice.html'
+        exclude 'META-INF/ECLIPSE_.SF'
+        exclude 'META-INF/ECLIPSE_.RSA'
+    }
 }
 
 dependencies {

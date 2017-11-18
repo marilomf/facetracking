@@ -38,6 +38,12 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.client.californium.LeshanClient;
+import org.eclipse.leshan.client.observer.LwM2mClientObserver;
+import org.eclipse.leshan.client.servers.DmServerInfo;
+import org.eclipse.leshan.client.servers.ServerInfo;
+
 import java.io.IOException;
 
 /**
@@ -56,6 +62,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
+
+    private LeshanClient client;
+    private MoodSensor moodSensor;
 
     //==============================================================================================
     // Activity Methods
@@ -83,6 +92,71 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         } else {
             requestCameraPermission();
         }
+
+        moodSensor = new MoodSensor();
+        client = AndroidLeshanClient.init(getResources().openRawResource(R.raw.omaobjectsspec), moodSensor);
+        client.start();
+        client.addObserver(new LwM2mClientObserver() {
+            @Override
+            public void onBootstrapSuccess(ServerInfo bsserver) {
+
+            }
+
+            @Override
+            public void onBootstrapFailure(ServerInfo bsserver, ResponseCode responseCode, String errorMessage) {
+
+            }
+
+            @Override
+            public void onBootstrapTimeout(ServerInfo bsserver) {
+
+            }
+
+            @Override
+            public void onRegistrationSuccess(DmServerInfo server, String registrationID) {
+                Log.e(TAG, "REGISTRATION SUCCESS");
+            }
+
+            @Override
+            public void onRegistrationFailure(DmServerInfo server, ResponseCode responseCode, String errorMessage) {
+
+            }
+
+            @Override
+            public void onRegistrationTimeout(DmServerInfo server) {
+
+            }
+
+            @Override
+            public void onUpdateSuccess(DmServerInfo server, String registrationID) {
+
+            }
+
+            @Override
+            public void onUpdateFailure(DmServerInfo server, ResponseCode responseCode, String errorMessage) {
+
+            }
+
+            @Override
+            public void onUpdateTimeout(DmServerInfo server) {
+
+            }
+
+            @Override
+            public void onDeregistrationSuccess(DmServerInfo server, String registrationID) {
+
+            }
+
+            @Override
+            public void onDeregistrationFailure(DmServerInfo server, ResponseCode responseCode, String errorMessage) {
+
+            }
+
+            @Override
+            public void onDeregistrationTimeout(DmServerInfo server) {
+
+            }
+        });
     }
 
     /**
@@ -284,7 +358,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         GraphicFaceTracker(GraphicOverlay overlay,Context context) {
             mOverlay = overlay;
-            mFaceGraphic = new FaceGraphic(overlay,context);
+            mFaceGraphic = new FaceGraphic(overlay,context, moodSensor);
         }
 
         /**

@@ -20,10 +20,21 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.face.Face;
+
+import org.eclipse.leshan.util.NamedThreadFactory;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static android.content.ContentValues.TAG;
+import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -57,8 +68,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private volatile Face mFace;
     private int mFaceId;
     private Context mContext;
+    private final MoodSensor moodSensor;
+    AtomicInteger counter = new AtomicInteger(0);
 
-    FaceGraphic(GraphicOverlay overlay, Context context) {
+    FaceGraphic(GraphicOverlay overlay, Context context, MoodSensor moodSensor) {
         super(overlay);
 
         mContext=context;
@@ -77,7 +90,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
 
+        this.moodSensor = moodSensor;
     }
+
+
 
     void setId(int id) {
         mFaceId = id;
@@ -111,6 +127,9 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         canvas.drawCircle(x, y, FACE_POSITION_RADIUS, mFacePositionPaint);
         canvas.drawText("id: " + mFaceId, x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
         canvas.drawText("happiness: " + String.format("%.2f", face.getIsSmilingProbability()), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
+        int happiness = (int) (face.getIsSmilingProbability() * 100);
+        this.moodSensor.setHappiness(happiness);
+        Log.e(TAG, "Setting happiness to" + happiness);
 
         String prediction = getPrediction(face.getEulerY(),face.getEulerZ());
         canvas.drawText("Prediction: "+prediction,x-ID_X_OFFSET,y-ID_Y_OFFSET+3*ID_TEXT_SIZE,mIdPaint);
